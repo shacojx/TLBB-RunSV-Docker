@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  gs:
+    build:
+      context: ./gameserver
+      dockerfile: Dockerfile
+    ports:
+      - "7384:7384"
+      - "3731:3731"
+    volumes:
+      - ./workspace/server:/home/tlbb
+      - ./gameserver/config/odbc.ini:/etc/odbc.ini
+    links:
+      - tlbbdb
+      - webdb
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+    cap_add:
+      - ALL
+    privileged: true
+    restart: ${RESTART}
+
+  webdb:
+    build:
+      context: ./webdb
+      dockerfile: Dockerfile
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./webdb/database:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "tlbb1234"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "web"
+    restart: ${RESTART}
+
+  tlbbdb:
+    build:
+      context: ./tlbbdb
+      dockerfile: Dockerfile
+    # ports:
+    #   - "6306:3306"
+    volumes:
+      - ./tlbbdb/database:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "tlbb1234"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "tlbbdb"
+    restart: ${RESTART}
+
